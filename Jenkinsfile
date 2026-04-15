@@ -17,6 +17,13 @@ pipeline {
             }
         }
 
+        stage('Cleanup') {
+            steps {
+                echo '🧹 Limpiando contenedores anteriores...'
+                sh 'docker compose -f ${COMPOSE_FILE} down --remove-orphans || true'
+            }
+        }
+
         stage('Build Images') {
             steps {
                 echo '🔨 Construyendo imágenes Docker...'
