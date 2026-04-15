@@ -2,7 +2,7 @@
  * bkp_canary.js
  * Detecta automáticamente qué contenedor está activo (blue/green)
  * y reescribe nginx.conf con los pesos correctos.
- * FIX: Compatible con Windows (shell: cmd.exe, sin comillas en format)
+ * FIX: Compatible con Windows y Linux/Jenkins
  */
 
 const { execSync } = require('child_process');
@@ -14,7 +14,9 @@ const NGINX_CONTAINER = 'nginx_lb';
 const BLUE_CONTAINER  = 'app_blue';
 const GREEN_CONTAINER = 'app_green';
 
-const EXEC_OPTS = { shell: 'cmd.exe' };
+// Detectar SO automáticamente
+const IS_WINDOWS = process.platform === 'win32';
+const EXEC_OPTS  = IS_WINDOWS ? { shell: 'cmd.exe' } : {};
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -25,18 +27,6 @@ function isRunning(containerName) {
       EXEC_OPTS
     ).toString().trim();
     return result === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function isHealthy(containerName) {
-  try {
-    const result = execSync(
-      `docker inspect --format {{.State.Health.Status}} ${containerName}`,
-      EXEC_OPTS
-    ).toString().trim();
-    return result === 'healthy' || result === 'none' || result === '';
   } catch {
     return false;
   }
