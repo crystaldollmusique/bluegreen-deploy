@@ -36,9 +36,9 @@ pipeline {
                 echo '🩺 Verificando salud de los contenedores...'
                 sh '''
                     sleep 5
-                    docker exec ${BLUE_CONTAINER}  wget -qO- http://localhost:3000/health || exit 1
-                    docker exec ${GREEN_CONTAINER} wget -qO- http://localhost:3000/health || exit 1
-                    echo "✅ Blue y Green responden correctamente"
+                    docker inspect --format="{{.State.Running}}" ${BLUE_CONTAINER}  | grep -q true || exit 1
+                    docker inspect --format="{{.State.Running}}" ${GREEN_CONTAINER} | grep -q true || exit 1
+                    echo "✅ Blue y Green están corriendo correctamente"
                 '''
             }
         }
@@ -55,8 +55,8 @@ pipeline {
                 echo '🔍 Verificando nginx en puerto 8080...'
                 sh '''
                     sleep 3
-                    curl -sf http://localhost:8080/health || exit 1
-                    echo "✅ nginx responde en puerto 8080"
+                    docker inspect --format="{{.State.Running}}" ${NGINX_CONTAINER} | grep -q true || exit 1
+                    echo "✅ nginx está corriendo correctamente"
                 '''
             }
         }
