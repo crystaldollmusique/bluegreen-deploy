@@ -43,6 +43,17 @@ pipeline {
             }
         }
 
+        stage('Fix Comillas Canary') {
+            steps {
+                echo '🔧 Corrigiendo comillas en bkp_canary.js...'
+                sh """
+                    sed -i 's/"true/true/g' BackupCanary/bkp_canary.js
+                    sed -i 's/"healthy/healthy/g' BackupCanary/bkp_canary.js
+                    sed -i 's/"none/none/g' BackupCanary/bkp_canary.js
+                """
+            }
+        }
+
         stage('Auto Blue/Green Routing') {
             steps {
                 echo '⚖️  Configurando ruteo automático Blue/Green...'
