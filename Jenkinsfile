@@ -29,7 +29,10 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo '🧹 Limpiando contenedores anteriores...'
-                sh 'docker compose -f ${COMPOSE_FILE} down --remove-orphans || true'
+                sh '''
+                    docker rm -f app_blue app_green nginx_lb || true
+                    docker compose -f ${COMPOSE_FILE} down --remove-orphans || true
+                '''
             }
         }
 
