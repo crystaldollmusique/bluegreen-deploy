@@ -14,6 +14,15 @@ pipeline {
             steps {
                 echo '📥 Obteniendo código fuente...'
                 checkout scm
+                // FIX: fuerza que nginx.conf sea el archivo del repo,
+                // por si Jenkins lo creó como carpeta en builds anteriores
+                sh '''
+                    if [ -d "proxy/nginx.conf" ]; then
+                        echo "⚠️  proxy/nginx.conf es una carpeta — eliminando..."
+                        rm -rf proxy/nginx.conf
+                    fi
+                    git checkout proxy/nginx.conf
+                '''
             }
         }
 
