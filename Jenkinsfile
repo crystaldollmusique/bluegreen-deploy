@@ -50,8 +50,9 @@ NGINXEOF
             steps {
                 echo '🧹 Limpiando contenedores anteriores...'
                 sh '''
-                    docker rm -f app_blue app_green nginx_lb || true
-                    docker compose -f ${COMPOSE_FILE} down --remove-orphans || true
+                docker rm -f app_blue app_green nginx_lb || true
+                docker ps -a --filter "name=app_blue" --filter "name=app_green" --filter "name=nginx_lb" -q | xargs -r docker rm -f
+                docker compose -f docker-compose.yml down --remove-orphans --volumes || true
                 '''
             }
         }
