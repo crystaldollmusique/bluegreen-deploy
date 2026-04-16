@@ -14,14 +14,34 @@ pipeline {
             steps {
                 echo '📥 Obteniendo código fuente...'
                 checkout scm
-                // FIX: fuerza que nginx.conf sea el archivo del repo,
-                // por si Jenkins lo creó como carpeta en builds anteriores
                 sh '''
+                    # Si Docker creó nginx.conf como carpeta, eliminarla
                     if [ -d "proxy/nginx.conf" ]; then
                         echo "⚠️  proxy/nginx.conf es una carpeta — eliminando..."
                         rm -rf proxy/nginx.conf
                     fi
-                    git checkout proxy/nginx.conf
+                    # Si por alguna razón el archivo no existe, crearlo
+                    if [ ! -f "proxy/nginx.conf" ]; then
+                        echo "⚠️  proxy/nginx.conf no existe — creándolo..."
+                        mkdir -p proxy
+                        cat > proxy/nginx.conf << 'NGINXEOF'
+events {}
+
+http {
+    upstream app {
+        server app_blue:3000 weight=10;
+        server app_green:3000 weight=0;
+    }
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://app;
+        }
+    }
+}
+NGINXEOF
+                    fi
+                    echo "✅ proxy/nginx.conf listo — $(file proxy/nginx.conf)"
                 '''
             }
         }
