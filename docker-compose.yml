@@ -34,15 +34,12 @@ services:
       retries: 3
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     container_name: nginx_lb
     ports:
       - "8080:80"
-    volumes:
-      - type: bind
-        source: ./proxy/nginx.conf
-        target: /etc/nginx/nginx.conf
-        read_only: true
     depends_on:
       - blue
       - green
