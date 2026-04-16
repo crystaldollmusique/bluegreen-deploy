@@ -17,6 +17,13 @@ pipeline {
             }
         }
 
+        stage('Cleanup') {
+            steps {
+                echo '🧹 Limpiando contenedores anteriores...'
+                sh 'docker compose -f ${COMPOSE_FILE} down --remove-orphans || true'
+            }
+        }
+
         stage('Build Images') {
             steps {
                 echo '🔨 Construyendo imágenes Docker...'
@@ -40,6 +47,17 @@ pipeline {
                     docker inspect --format="{{.State.Running}}" ${GREEN_CONTAINER} | grep -q true || exit 1
                     echo "✅ Blue y Green están corriendo correctamente"
                 '''
+            }
+        }
+
+        stage('Fix Comillas Canary') {
+            steps {
+                echo '🔧 Corrigiendo comillas en bkp_canary.js...'
+                sh """
+                    sed -i 's/"true/true/g' BackupCanary/bkp_canary.js
+                    sed -i 's/"healthy/healthy/g' BackupCanary/bkp_canary.js
+                    sed -i 's/"none/none/g' BackupCanary/bkp_canary.js
+                """
             }
         }
 

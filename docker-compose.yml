@@ -1,5 +1,6 @@
-services:
+version: '3.8'
 
+services:
   blue:
     build:
       context: ./app
@@ -38,7 +39,10 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - type: bind
+        source: ./nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
     depends_on:
       - blue
       - green
