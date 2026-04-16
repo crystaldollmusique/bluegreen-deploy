@@ -34,12 +34,15 @@ services:
       retries: 3
 
   nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
+    image: nginx:alpine
     container_name: nginx_lb
     ports:
       - "8080:80"
+    volumes:
+      - type: bind
+        source: ./proxy/nginx.conf  # <--- Usamos proxy para evitar el bloqueo
+        target: /etc/nginx/nginx.conf
+        read_only: false            # <--- 'false' para que el script pueda escribir los pesos
     depends_on:
       - blue
       - green

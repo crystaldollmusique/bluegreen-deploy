@@ -9,7 +9,8 @@ const { execSync } = require('child_process');
 const fs           = require('fs');
 const path         = require('path');
 
-const NGINX_CONF      = path.resolve(__dirname, '../nginx/nginx.conf');
+// CAMBIO AQUÍ: Cambiamos '../nginx/nginx.conf' por '../proxy/nginx.conf'
+const NGINX_CONF      = path.resolve(__dirname, '../proxy/nginx.conf');
 const NGINX_CONTAINER = 'nginx_lb';
 const BLUE_CONTAINER  = 'app_blue';
 const GREEN_CONTAINER = 'app_green';
@@ -56,10 +57,10 @@ http {
 
         location / {
             proxy_pass         http://app;
-            proxy_set_header   Host              $host;
-            proxy_set_header   X-Real-IP         $remote_addr;
-            proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-            add_header         X-Upstream        $upstream_addr always;
+            proxy_set_header   Host               $host;
+            proxy_set_header   X-Real-IP          $remote_addr;
+            proxy_set_header   X-Forwarded-For    $proxy_add_x_forwarded_for;
+            add_header         X-Upstream         $upstream_addr always;
         }
 
         location /health {
@@ -100,9 +101,14 @@ if (blueUp && greenUp) {
 }
 
 // Escribir nginx.conf
-const conf = generateNginxConf(blueWeight, greenWeight);
-fs.writeFileSync(NGINX_CONF, conf, 'utf8');
-console.log('[canary] nginx.conf actualizado');
+try {
+    const conf = generateNginxConf(blueWeight, greenWeight);
+    fs.writeFileSync(NGINX_CONF, conf, 'utf8');
+    console.log('[canary] nginx.conf actualizado en la ruta proxy');
+} catch (err) {
+    console.error('[canary] Error fatal al escribir el archivo:', err.message);
+    process.exit(1);
+}
 
 // Recargar nginx sin downtime
 try {
